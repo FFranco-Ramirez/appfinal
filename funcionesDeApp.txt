@@ -1,0 +1,79 @@
+Desde la aplicación móvil se debe permitir agregar nuevos sensores RFID
+(tarjetas o llaveros) asociados a un departamento y a un usuario
+administrador:
+o La app debe disponer de una pantalla de “Gestión de Sensores”.
+El administrador debe poder ingresar:
+ Código único del sensor (MAC / UID RFID).
+ Estado inicial del sensor (activo, inactivo, perdido,
+bloqueado).
+Al guardar, la app debe:
+o Enviar la información a la API en AWS.
+o Registrar el sensor en la tabla correspondiente (por ejemplo:
+sensores).
+o Asociar el sensor al departamento y al usuario.
+
+
+Activar / desactivar sensores desde la app
+o La aplicación móvil debe permitir cambiar el estado de cada sensor
+(ej.: activo / inactivo) desde la pantalla de gestión.
+o Solo el usuario administrador del departamento puede: Activar o
+desactivar un sensor, marcar un sensor como “perdido/bloqueado”
+El cambio debe reflejarse de inmediato en la BD en AWS para que el
+NodeMCU considere el nuevo estado en la validación de acceso.
+
+Control manual de la barrera desde la App - Apertura y cierre remoto
+de barrera
+o Abrir (levantar) la barrera manualmente mediante un botón “Abrir
+barrera”.
+o Cerrar (bajar) la barrera manualmente mediante un botón “Cerrar
+barrera”.
+La app debe:
+o Enviar la acción al backend/API, que a su vez notifica al
+microcontrolador (NodeMCU).
+o Mostrar el estado actual de la barrera (Abierta / Cerrada).
+o Toda apertura/cierre manual debe registrarse como evento de
+acceso en la BD.
+
+
+Validación de Acceso:
+o Si el llavero o Tarjeta RFID es válido:
+o El aro LED debe encenderse en color verde.
+o El servo motor debe levantar la barrera de acceso.
+o Después de 10 segundos, la barrera debe volver a bajar
+automáticamente.
+o Debe registrar la fecha y hora del acceso
+o En la Aplicación Móvil se debe visualizar inmediatamente el
+evento ocurrido.
+o Si una llavero o Tarjeta RFID no tiene acceso:
+o El aro LED debe encenderse en color rojo.
+o Registrar el evento en la base de datos en la nube fecha y hora.
+o En la Aplicación Móvil se debe visualizar inmediatamente el
+evento ocurrido.
+
+Gestión desde la Aplicación Móvil:
+o Mostrar el estado en tiempo real de los accesos. (Valido - Fallido)
+Identificar quién intenta ingresar y mostrar las opciones:
+ Permitir Acceso: Al presionar un botón, el aro LED debe
+encenderse en verde y el servo motor debe levantar la
+barrera.
+ Denegar Acceso: Mantener el aro LED en rojo y no activar la
+barrera.
+
+1. Funcionamiento del Prototipo (25 Pts):
+o Debe realizar la conexión de los dispositivos de manera funcional
+donde se muestre la correcta conexión y funcionamiento del sistema
+IOT
+2. Diseño e Implementación Técnica (25 Pts):
+o Correcta configuración del NodeMCU y los componentes físicos
+(aro LED, servo motor, lector RFID).
+o Integración con la nube (AWS) para el almacenamiento de datos.
+3. Funcionalidad del Sistema (30 Pts):
+o Registro y validación de accesos en tiempo real.
+o Respuesta adecuada del aro LED y la barrera según el estado de
+validación.
+4. Desarrollo de la Aplicación Móvil (50 Pts):
+o Diseño intuitivo y funcional de la aplicación.
+o Correcto manejo de los accesos y visualización del historial.
+o Registrar Sensores
+o Activar o Desactivar Sensores
+o Agregar, Modificar, Eliminar Usuarios

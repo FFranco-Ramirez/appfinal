@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Informe de Requisitos y Estado - Control de Acceso RFID IoT</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.45; color: #222; margin: 24px; }
+    h1, h2, h3 { margin: 0.6em 0 0.3em; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    h3 { font-size: 16px; }
+    ul { margin: 0.2em 0 1em 1.2em; }
+    li { margin: 0.2em 0; }
+    code, .file-ref { background: #f7f7f7; padding: 0 4px; border: 1px solid #eee; border-radius: 3px; }
+    .quote { background: #fafafa; border-left: 3px solid #888; padding: 8px 10px; margin: 8px 0; font-size: 0.95em; }
+    .status-done { color: #0a7f16; font-weight: bold; }
+    .status-partial { color: #b58100; font-weight: bold; }
+    .status-pending { color: #b00020; font-weight: bold; }
+    .small { color: #555; font-size: 0.9em; }
+    .grid { display: grid; grid-template-columns: 220px 1fr; gap: 6px 14px; align-items: start; }
+    .grid .label { font-weight: bold; }
+    .note { background: #fffdea; border: 1px solid #f0e0a0; padding: 8px 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Informe de Requisitos y Estado</h1>
+  <div class="small">
+    Fuente: <span class="file-ref">funcionesDeApp.txt</span> y <span class="file-ref">evaluacion.txt</span> en <code>d:\Desktop\ALL\clases\cuarto_semestre\Aplicaciones_moviles\UltimaEvaluacion\</code>
+  </div>
+
+  <h2>1. Requisitos Funcionales</h2>
+
+  <h3>1.1 Gestión de Sensores (alta y asociación)</h3>
+  <div class="quote">
+    “Desde la aplicación móvil se debe permitir agregar nuevos sensores RFID (tarjetas o llaveros) asociados a un departamento y a un usuario administrador:<br/>
+    o La app debe disponer de una pantalla de ‘Gestión de Sensores’. El administrador debe poder ingresar: Código único del sensor (MAC / UID RFID). Estado inicial del sensor (activo, inactivo, perdido, bloqueado). Al guardar, la app debe: Enviar la información a la API en AWS. Registrar el sensor en la tabla correspondiente (por ejemplo: sensores). Asociar el sensor al departamento y al usuario.”<br/>
+    — <span class="file-ref">funcionesDeApp.txt</span>
+  </div>
+  <ul>
+    <li>Pantalla de Gestión de Sensores (solo admin).</li>
+    <li>Alta de sensor con campos: UID/MAC, estado inicial, tipo (llavero/tarjeta), apodo opcional.</li>
+    <li>Asociación a departamento y usuario administrador.</li>
+    <li>Envío a API AWS para registro en BD.</li>
+  </ul>
+
+  <h3>1.2 Activar / Desactivar / Bloquear / Marcar como Perdido</h3>
+  <div class="quote">
+    “La aplicación móvil debe permitir cambiar el estado de cada sensor (ej.: activo / inactivo) desde la pantalla de gestión. Solo el usuario administrador del departamento puede: Activar o desactivar un sensor, marcar un sensor como ‘perdido/bloqueado’. El cambio debe reflejarse de inmediato en la BD en AWS para que el NodeMCU considere el nuevo estado en la validación de acceso.”<br/>
+    — <span class="file-ref">funcionesDeApp.txt</span>
+  </div>
+  <ul>
+    <li>Cambio de estado de sensor desde la app (admin únicamente).</li>
+    <li>Estados soportados: activo, inactivo, perdido, bloqueado.</li>
+    <li>Reflejo inmediato en BD para que el microcontrolador valide según estado.</li>
+  </ul>
+
+  <h3>1.3 Control Manual de Barrera</h3>
+  <div class="quote">
+    “Abrir (levantar) la barrera manualmente mediante un botón ‘Abrir barrera’. Cerrar (bajar) la barrera manualmente mediante un botón ‘Cerrar barrera’. La app debe: Enviar la acción al backend/API, que a su vez notifica al microcontrolador (NodeMCU). Mostrar el estado actual de la barrera (Abierta / Cerrada). Toda apertura/cierre manual debe registrarse como evento de acceso en la BD.”<br/>
+    — <span class="file-ref">funcionesDeApp.txt</span> y <span class="file-ref">evaluacion.txt</span>
+  </div>
+  <ul>
+    <li>Botones “Abrir barrera” y “Cerrar barrera”.</li>
+    <li>API encola comando; NodeMCU ejecuta; BD registra evento (APERTURA_MANUAL/CIERRE_MANUAL).</li>
+    <li>Visualización de estado actual de barrera.</li>
+  </ul>
+
+  <h3>1.4 Visualización de Historial y Estado en Tiempo Real</h3>
+  <div class="quote">
+    “Mostrar el estado en tiempo real de los accesos (Válido - Fallido). Identificar quién intenta ingresar y mostrar las opciones: Permitir Acceso… Denegar Acceso…”<br/>
+    — <span class="file-ref">funcionesDeApp.txt</span>
+  </div>
+  <ul>
+    <li>Listado de eventos de acceso (válido/denegado) con fecha/hora.</li>
+    <li>Identificación del usuario/sensor en el intento de acceso.</li>
+    <li>Opciones de permitir/denegar desde la app (manual, si aplica al flujo).</li>
+  </ul>
+
+  <h3>1.5 Roles y Usuarios</h3>
+  <div class="quote">
+    “Múltiples usuarios por departamento… Rol de administrador por departamento… Funciones exclusivas del administrador… Usuarios operadores… No pueden agregar, eliminar ni cambiar estados de sensores.”<br/>
+    — <span class="file-ref">evaluacion.txt</span>
+  </div>
+  <ul>
+    <li>Admin único por departamento; operadores no pueden gestionar sensores.</li>
+    <li>Administración de usuarios: agregar, modificar, eliminar (requerido en app).</li>
+    <li>Asociación de sensores y permisos por departamento.</li>
+  </ul>
+
+  <h3>1.6 Validación de Acceso (flujo del sistema IoT)</h3>
+  <div class="quote">
+    “Si el llavero o Tarjeta RFID es válido: aro LED verde, servo levanta barrera, baja a los 10 segundos, registrar fecha/hora, visualizar en app. Si no tiene acceso: aro LED rojo, registrar el evento, visualizar en app.”<br/>
+    — <span class="file-ref">evaluacion.txt</span>
+  </div>
+  <ul>
+    <li>Validación por NodeMCU contra BD (via API).</li>
+    <li>Accionamiento físico (LED/servo) y registro de evento.</li>
+    <li>Visualización inmediata del evento en la app.</li>
+  </ul>
+
+  <h2>2. Requisitos No Funcionales</h2>
+  <ul>
+    <li>Tiempo real / inmediatez: cambios de estado deben reflejarse “de inmediato” en BD; la app debe “visualizar inmediatamente” eventos (ambos: <span class="file-ref">funcionesDeApp.txt</span>, <span class="file-ref">evaluacion.txt</span>).</li>
+    <li>Usabilidad: “Diseño intuitivo y funcional de la aplicación.” — <span class="file-ref">evaluacion.txt</span> (Criterios).</li>
+    <li>Escalabilidad funcional: “Múltiples usuarios por departamento” y varios sensores por usuario — <span class="file-ref">evaluacion.txt</span>.</li>
+    <li>Auditabilidad: registrar eventos con “fecha y hora” — <span class="file-ref">evaluacion.txt</span>.</li>
+    <li>Integración con la nube: “Integración con la nube (AWS) para el almacenamiento de datos.” — <span class="file-ref">evaluacion.txt</span>.</li>
+  </ul>
+
+  <h2>3. Estado Actual de Implementación</h2>
+  <div class="grid">
+    <div class="label">Backend (API PHP en EC2)</div>
+    <div>
+      <ul>
+        <li><span class="status-done">Presente</span>: <code>config.php</code>, <code>db.php</code>, <code>create.php</code>, <code>update_status.php</code>, <code>control.php</code>, <code>validate.php</code>, <code>next_command.php</code>, <code>list.php</code>, <code>access_events_list.php</code>, <code>user_create.php</code>, <code>departments_without_admin.php</code>, <code>department_create.php</code>, <code>department_set_admin.php</code>.</li>
+        <li><span class="status-done">Corregido</span>: Inclusión de <code>db.php</code> por ruta relativa en <code>create.php</code>, <code>validate.php</code>, <code>control.php</code>, <code>next_command.php</code>, <code>update_status.php</code>; normalización de estado en <code>validate.php</code> para evitar discrepancias ("ACTIVO" vs "activo").</li>
+        <li><span class="status-done">Listo</span>: Vista/tabla <code>sensores</code> confirmada; tabla <code>eventos_acceso</code> existente; índices aplicados según <span class="file-ref">BaseDeDatos.txt</span>.</li>
+      </ul>
+    </div>
+
+    <div class="label">Aplicación Android (Java + Volley)</div>
+    <div>
+      <ul>
+        <li><span class="status-done">Implementado</span>: Pantallas y navegación: <code>MainActivity</code>, <code>SensorListActivity</code> (alta/cambio de estado), <code>BarrierControlActivity</code>, <code>AccessHistoryActivity</code>, <code>CreateUserActivity</code>; métodos en <code>ApiClient</code> hacia <code>create.php</code>, <code>update_status.php</code>, <code>control.php</code>, <code>access_events_list.php</code>, <code>user_create.php</code>.</li>
+        <li><span class="status-partial">Parcial</span>: Historial de accesos visible y filtrable; pendiente “tiempo real” continuo.</li>
+        <li><span class="status-done">Implementado</span>: Login y manejo de roles (admin/operador) con <code>SessionManager</code>; flujo de asociación de departamento para ADMIN sin departamento.</li>
+      </ul>
+    </div>
+
+    <div class="label">Firmware NodeMCU</div>
+    <div>
+      <ul>
+        <li><span class="status-pending">Pendiente</span>: Conexión WiFi, lectura RFID, validación vía <code>validate.php</code>, ejecución de comandos vía <code>next_command.php</code>, control de LED/servo y registro de eventos.</li>
+      </ul>
+    </div>
+
+    <div class="label">Infraestructura AWS</div>
+    <div>
+      <ul>
+        <li><span class="status-partial">Parcial</span>: EC2 operativo; phpMyAdmin disponible para BD “condominio”.</li>
+        <li><span class="status-pending">Pendiente</span>: Creación/ejecución del esquema completo (tablas y FKs); asegurar que la API usa HTTPS y CORS según sea necesario.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>4. Prioridades de Desarrollo</h2>
+  <div class="quote">
+    “4. Desarrollo de la Aplicación Móvil (50 Pts)… 3. Funcionalidad del Sistema (30 Pts)… 2. Diseño e Implementación Técnica (25 Pts)… 1. Funcionamiento del Prototipo (25 Pts)” — <span class="file-ref">evaluacion.txt</span> (Criterios de Evaluación)
+  </div>
+  <ul>
+    <li><strong>Alta prioridad (50 pts):</strong> App móvil — pantallas de Gestión de Sensores, Historial de Accesos, Control de Barrera, manejo de usuarios y roles.</li>
+    <li><strong>Alta/Media (30 pts):</strong> Funcionalidad en tiempo real — reflejo inmediato de estados y visualización de eventos.</li>
+    <li><strong>Media (25 pts):</strong> NodeMCU y componentes físicos — correcta configuración y respuesta (LED/servo/RFID).</li>
+    <li><strong>Media (25 pts):</strong> Integración técnica con AWS — BD y APIs funcionando y seguras.</li>
+  </ul>
+
+  <h2>5. Dependencias entre Requisitos</h2>
+  <ul>
+    <li>App “Gestión de Sensores” depende de API <code>create.php</code>, <code>update_status.php</code> y de un endpoint de listado (<code>list.php</code>).</li>
+    <li>App “Historial de Accesos” depende de endpoint de eventos (p. ej. <code>access_events_list.php</code>) y de que NodeMCU registre eventos (válido/denegado, apertura/cierre manual).</li>
+    <li>Control de Barrera en la app depende de <code>control.php</code> y de que NodeMCU consuma <code>next_command.php</code>.</li>
+    <li>Validación RFID depende de BD de sensores y de <code>validate.php</code> (NodeMCU).</li>
+    <li>Roles (admin único por departamento) dependen de diseño de BD y de lógica en API que lo haga cumplir.</li>
+  </ul>
+
+  <h2>6. Estimación de Tiempo (pendientes)</h2>
+  <ul>
+    <li>API de listado de sensores (<code>list.php</code>): 1–2 horas.</li>
+    <li>API de listado de eventos (<code>access_events_list.php</code>): 1–2 horas.</li>
+    <li>Ejecución y verificación del esquema SQL de BD (tablas, FKs, índices): 2–3 horas.</li>
+    <li>Pantalla “Gestión de Sensores” (lista, alta, cambio de estado): 4–6 horas.</li>
+    <li>Pantalla “Historial de Accesos” (consulta, filtros básicos): 3–4 horas.</li>
+    <li>Pantalla “Control de Barrera” (acciones y estado): 2–3 horas.</li>
+    <li>Login básico y roles (admin/operador) en app y API: 4–6 horas.</li>
+    <li>Firmware NodeMCU (RFID, LED, servo, validate/next_command, registro de eventos): 6–10 horas.</li>
+    <li>Pruebas integrales (end-to-end) y ajustes: 3–5 horas.</li>
+  </ul>
+
+  <h2>7. Referencias Exactas a Secciones</h2>
+  <ul>
+    <li><span class="file-ref">evaluacion.txt</span> — “Desarrollo de la Aplicación Móvil (50 Pts)” (Criterios de Evaluación).</li>
+    <li><span class="file-ref">evaluacion.txt</span> — “Diseño e Implementación Técnica (25 Pts)” y materiales requeridos (NodeMCU, aro LED, servo, lector RFID).</li>
+    <li><span class="file-ref">evaluacion.txt</span> — “Registro en la Nube (AWS)” (instancia, tabla de MAC válidas, tabla de eventos, creación de API).</li>
+    <li><span class="file-ref">evaluacion.txt</span> — “Validación de Acceso” (flujo detallado de LED/servo y registro de eventos).</li>
+    <li><span class="file-ref">evaluacion.txt</span> — “Requerimiento Funcional de la Solución” (roles admin/operador, múltiples usuarios por departamento).</li>
+    <li><span class="file-ref">funcionesDeApp.txt</span> — “Gestión de Sensores” (alta, estado inicial, asociación y envío a API).</li>
+    <li><span class="file-ref">funcionesDeApp.txt</span> — “Activar / desactivar sensores” (cambio de estado inmediato en BD).</li>
+    <li><span class="file-ref">funcionesDeApp.txt</span> — “Control manual de la barrera” (abrir/cerrar, status y registro en BD).</li>
+    <li><span class="file-ref">funcionesDeApp.txt</span> — “Gestión desde la Aplicación Móvil” (estado en tiempo real y opciones permitir/denegar).</li>
+  </ul>
+
+  <div class="note">
+    Próximos pasos prácticos actualizados:
+    <ul>
+      <li>Verificar BD "condominio" y que existan <code>sensors</code>, <code>eventos_acceso</code> y la vista/tabla <code>sensores</code> consumida por <code>list.php</code>.</li>
+      <li>Probar en EC2 los endpoints corregidos: <code>create.php</code>, <code>validate.php</code>, <code>update_status.php</code>, <code>control.php</code>, <code>next_command.php</code>, <code>list.php</code>, <code>access_events_list.php</code>.</li>
+      <li>Completar pantallas de la app: listado de sensores, control de barrera, roles/login.</li>
+    </ul>
+  </div>
+
+  <h2>8. Plan de Implementación y Correcciones</h2>
+
+  <h3>8.1 Componentes Principales a Implementar</h3>
+  <ul>
+    <li>Gestión de Sensores: listado, alta, cambio de estado, detalle.</li>
+    <li>Control Manual de Barrera: acciones abrir/cerrar y visualización de estado.</li>
+    <li>Historial de Accesos en tiempo real: refresco automático y filtros.</li>
+    <li>Usuarios y Roles: login básico y restricción por rol (admin/operador).</li>
+  </ul>
+
+  <h3>8.2 Funcionalidades Clave Pendientes</h3>
+  <ul>
+    <li>Listado de sensores en la app (UI y consumo de <code>list.php</code>).</li>
+    <li>Pantalla de control de barrera (consumo de <code>control.php</code> y feedback).</li>
+    <li>Login/roles y uso de <code>user_id</code> real en llamadas.</li>
+    <li>Refresco del historial (<code>access_events_list.php</code>) y vista detallada.</li>
+  </ul>
+
+  <h3>8.3 Errores/Problemas detectados</h3>
+  <ul>
+    <li>Duplicado en <span class="file-ref">BaseDeDatos.txt</span>: dos INSERT de <code>departamentos</code> id=1 (líneas 202 y 204). Eliminar uno para evitar colisión.</li>
+    <li>Hashes BCRYPT de ejemplo en <span class="file-ref">BaseDeDatos.txt</span> deben reemplazarse por hashes reales.</li>
+    <li>Configurar <code>ApiClient.BASE_URL</code> según entorno y activar HTTPS en API.</li>
+  </ul>
+
+  <h3>8.4 Mejoras de Rendimiento/Usabilidad</h3>
+  <ul>
+    <li>Indicadores de carga y manejo de errores en las pantallas (añadido en listado de sensores).</li>
+    <li>Parámetros <code>limit</code> y filtros en listados para reducir tráfico.</li>
+    <li>Configuración de <code>BASE_URL</code> desde <code>config.php</code> para alinear entornos.</li>
+  </ul>
+
+  <h3>8.5 Tareas Pendientes Priorizadas y Estimación</h3>
+  <ul>
+    <li>Tiempo real en historial (auto-refresco/push) — 2–3 h.</li>
+    <li>HTTPS y endurecimiento de CORS en API — 1–2 h.</li>
+    <li>Firmware NodeMCU (RFID, validate/next_command, eventos) — 6–10 h.</li>
+    <li>Pruebas end-to-end y ajustes — 3–5 h.</li>
+  </ul>
+
+  <h2>9. Avances Aplicados</h2>
+  <ul>
+    <li>Login, roles y gating de UI con <code>SessionManager</code>; flujo de asociación de departamento para ADMIN sin departamento desde <code>MainActivity</code>.</li>
+    <li>Endpoints añadidos: <code>user_create.php</code>, <code>departments_without_admin.php</code>, <code>department_create.php</code>, <code>department_set_admin.php</code>.</li>
+    <li>Gestión de sensores: alta y cambio de estado desde <code>SensorListActivity</code> consumiendo <code>create.php</code> y <code>update_status.php</code>.</li>
+    <li>Historial de accesos visible con <code>AccessHistoryActivity</code> y <code>access_events_list.php</code>.</li>
+  </ul>
+</body>
+</html>
