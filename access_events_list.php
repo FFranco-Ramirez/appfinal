@@ -48,15 +48,14 @@ $sql = 'SELECT
             ea.resultado,
             s.codigo_sensor,
             s.tipo AS sensor_tipo,
-            s.nickname,
             s.id_departamento,
             u.nombre AS usuario_nombre
         FROM eventos_acceso ea
         LEFT JOIN sensores s ON s.id_sensor = ea.id_sensor
         LEFT JOIN usuarios u ON u.id_usuario = ea.id_usuario
-        WHERE s.id_departamento = ?';
+        WHERE (s.id_departamento = ? OR (ea.tipo_evento IN ("APERTURA_MANUAL","CIERRE_MANUAL") AND u.department_id = ?))';
 
-$params = [$departmentId];
+$params = [$departmentId, $departmentId];
 
 if ($sensorId) {
     $sql .= ' AND ea.id_sensor = ?';
