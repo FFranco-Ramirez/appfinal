@@ -27,3 +27,4 @@ try {
 } catch (Throwable $e) {
     respond(['ok'=>false, 'error'=>'db_error', 'message'=>$e->getMessage()], 500);
 }
+?>
