@@ -14,5 +14,9 @@ if (!$action) {
 }
 $stmt = $pdo->prepare('INSERT INTO barrier_commands (device_id, department_id, action, status, requested_by_user_id, created_at) VALUES (?, ?, ?, "queued", ?, NOW())');
 $stmt->execute([$input['device_id'], $input['department_id'], $action, $input['requested_by']]);
-echo json_encode(['ok' => true, 'command_id' => $pdo->lastInsertId()]);
+$cmdId = (int)$pdo->lastInsertId();
+$tipo = ($action === 'open') ? 'APERTURA_MANUAL' : 'CIERRE_MANUAL';
+$pdo->prepare('INSERT INTO eventos_acceso (id_sensor, id_usuario, tipo_evento, fecha_hora, resultado) VALUES (0, ?, ?, NOW(), "PERMITIDO")')
+    ->execute([$input['requested_by'], $tipo]);
+echo json_encode(['ok' => true, 'command_id' => $cmdId]);
 ?>
