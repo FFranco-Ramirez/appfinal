@@ -56,3 +56,4 @@ try {
     }
     respond(['ok' => false, 'error' => 'db_error', 'message' => $message], 500);
 }
+?>
