@@ -24,4 +24,5 @@ try {
     respond(['ok'=>true, 'department_id'=>$depId]);
 } catch (Throwable $e) {
     respond(['ok'=>false, 'error'=>'db_error', 'message'=>$e->getMessage()], 500);
-}
+} 
+?>
